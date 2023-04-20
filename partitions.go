@@ -25,7 +25,7 @@ import (
 )
 
 func PartitionsData() []byte {
-        cmd := exec.Command("sinfo", "-h", "-o%R,%C,%F")
+        cmd := exec.Command("sinfo", "-a", "-h", "-o%R,%C,%F")
         stdout, err := cmd.StdoutPipe()
         if err != nil {
                 log.Fatal(err)
