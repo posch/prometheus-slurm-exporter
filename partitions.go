@@ -25,7 +25,7 @@ import (
 )
 
 func PartitionsData() []byte {
-        cmd := exec.Command("sinfo", "-h", "-o%R,%C")
+        cmd := exec.Command("sinfo", "-h", "-o%R,%C,%F")
         stdout, err := cmd.StdoutPipe()
         if err != nil {
                 log.Fatal(err)
@@ -62,6 +62,10 @@ type PartitionMetrics struct {
         other float64
         pending float64
         total float64
+        nodes_allocated float64
+        nodes_idle float64
+        nodes_other float64
+        nodes_total float64
 }
 
 func ParsePartitionsMetrics() map[string]*PartitionMetrics {
@@ -73,7 +77,7 @@ func ParsePartitionsMetrics() map[string]*PartitionMetrics {
                         partition := strings.Split(line,",")[0]
                         _,key := partitions[partition]
                         if !key {
-                                partitions[partition] = &PartitionMetrics{0,0,0,0,0}
+                                partitions[partition] = &PartitionMetrics{0,0,0,0,0,0,0,0,0}
                         }
                         states := strings.Split(line,",")[1]
                         allocated,_ := strconv.ParseFloat(strings.Split(states,"/")[0],64)
@@ -84,7 +88,18 @@ func ParsePartitionsMetrics() map[string]*PartitionMetrics {
                         partitions[partition].idle = idle
                         partitions[partition].other = other
                         partitions[partition].total = total
-                }
+
+                        nodes_states := strings.Split(line,",")[2]
+                        nodes_allocated,_ := strconv.ParseFloat(strings.Split(nodes_states,"/")[0],64)
+                        nodes_idle,_ := strconv.ParseFloat(strings.Split(nodes_states,"/")[1],64)
+                        nodes_other,_ := strconv.ParseFloat(strings.Split(nodes_states,"/")[2],64)
+                        nodes_total,_ := strconv.ParseFloat(strings.Split(nodes_states,"/")[3],64)
+                        partitions[partition].nodes_allocated = nodes_allocated
+                        partitions[partition].nodes_idle = nodes_idle
+                        partitions[partition].nodes_other = nodes_other
+                        partitions[partition].nodes_total = nodes_total
+
+		}
         }
         // get list of pending jobs by partition name
         list := strings.Split(string(PartitionsPendingJobsData()),"\n")
@@ -106,6 +121,10 @@ type PartitionsCollector struct {
         other *prometheus.Desc
         pending *prometheus.Desc
         total *prometheus.Desc
+        nodes_allocated *prometheus.Desc
+        nodes_idle *prometheus.Desc
+        nodes_other *prometheus.Desc
+        nodes_total *prometheus.Desc
 }
 
 func NewPartitionsCollector() *PartitionsCollector {
@@ -116,6 +135,10 @@ func NewPartitionsCollector() *PartitionsCollector {
 		other: prometheus.NewDesc("slurm_partition_cpus_other", "Other CPUs for partition", labels,nil),
 		pending: prometheus.NewDesc("slurm_partition_jobs_pending", "Pending jobs for partition", labels,nil),
 		total: prometheus.NewDesc("slurm_partition_cpus_total", "Total CPUs for partition", labels,nil),
+                nodes_allocated: prometheus.NewDesc("slurm_partition_nodes_allocated", "Allocated nodes for partition", labels,nil),
+		nodes_idle: prometheus.NewDesc("slurm_partition_nodes_idle", "Idle nodes for partition", labels,nil),
+		nodes_other: prometheus.NewDesc("slurm_partition_nodes_other", "Nodes in other states for partition", labels,nil),
+		nodes_total: prometheus.NewDesc("slurm_partition_nodes_total", "Total number of nodes for partition", labels,nil),
         }
 }
 
@@ -125,6 +148,10 @@ func (pc *PartitionsCollector) Describe(ch chan<- *prometheus.Desc) {
         ch <- pc.other
         ch <- pc.pending
         ch <- pc.total
+        ch <- pc.nodes_allocated
+        ch <- pc.nodes_idle
+        ch <- pc.nodes_other
+        ch <- pc.nodes_total
 }
 
 func (pc *PartitionsCollector) Collect(ch chan<- prometheus.Metric) {
@@ -144,6 +171,18 @@ func (pc *PartitionsCollector) Collect(ch chan<- prometheus.Metric) {
                 }
                 if pm[p].total > 0 {
                         ch <- prometheus.MustNewConstMetric(pc.total, prometheus.GaugeValue, pm[p].total, p)
+                }
+                if pm[p].nodes_allocated > 0 {
+                        ch <- prometheus.MustNewConstMetric(pc.nodes_allocated, prometheus.GaugeValue, pm[p].nodes_allocated, p)
+                }
+                if pm[p].nodes_idle > 0 {
+                        ch <- prometheus.MustNewConstMetric(pc.nodes_idle, prometheus.GaugeValue, pm[p].nodes_idle, p)
+                }
+                if pm[p].nodes_other > 0 {
+                        ch <- prometheus.MustNewConstMetric(pc.nodes_other, prometheus.GaugeValue, pm[p].nodes_other, p)
+                }
+                if pm[p].nodes_total > 0 {
+                        ch <- prometheus.MustNewConstMetric(pc.nodes_total, prometheus.GaugeValue, pm[p].nodes_total, p)
                 }
         }
 }
