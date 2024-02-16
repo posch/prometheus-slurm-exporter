@@ -157,32 +157,14 @@ func (pc *PartitionsCollector) Describe(ch chan<- *prometheus.Desc) {
 func (pc *PartitionsCollector) Collect(ch chan<- prometheus.Metric) {
         pm := ParsePartitionsMetrics()
         for p := range pm {
-                if pm[p].allocated > 0 {
-                        ch <- prometheus.MustNewConstMetric(pc.allocated, prometheus.GaugeValue, pm[p].allocated, p)
-                }
-                if pm[p].idle > 0 {
-                        ch <- prometheus.MustNewConstMetric(pc.idle, prometheus.GaugeValue, pm[p].idle, p)
-                }
-                if pm[p].other > 0 {
-                        ch <- prometheus.MustNewConstMetric(pc.other, prometheus.GaugeValue, pm[p].other, p)
-                }
-                if pm[p].pending > 0 {
-                        ch <- prometheus.MustNewConstMetric(pc.pending, prometheus.GaugeValue, pm[p].pending, p)
-                }
-                if pm[p].total > 0 {
-                        ch <- prometheus.MustNewConstMetric(pc.total, prometheus.GaugeValue, pm[p].total, p)
-                }
-                if pm[p].nodes_allocated > 0 {
-                        ch <- prometheus.MustNewConstMetric(pc.nodes_allocated, prometheus.GaugeValue, pm[p].nodes_allocated, p)
-                }
-                if pm[p].nodes_idle > 0 {
-                        ch <- prometheus.MustNewConstMetric(pc.nodes_idle, prometheus.GaugeValue, pm[p].nodes_idle, p)
-                }
-                if pm[p].nodes_other > 0 {
-                        ch <- prometheus.MustNewConstMetric(pc.nodes_other, prometheus.GaugeValue, pm[p].nodes_other, p)
-                }
-                if pm[p].nodes_total > 0 {
-                        ch <- prometheus.MustNewConstMetric(pc.nodes_total, prometheus.GaugeValue, pm[p].nodes_total, p)
-                }
+		ch <- prometheus.MustNewConstMetric(pc.allocated, prometheus.GaugeValue, pm[p].allocated, p)
+		ch <- prometheus.MustNewConstMetric(pc.idle, prometheus.GaugeValue, pm[p].idle, p)
+		ch <- prometheus.MustNewConstMetric(pc.other, prometheus.GaugeValue, pm[p].other, p)
+		ch <- prometheus.MustNewConstMetric(pc.pending, prometheus.GaugeValue, pm[p].pending, p)
+		ch <- prometheus.MustNewConstMetric(pc.total, prometheus.GaugeValue, pm[p].total, p)
+		ch <- prometheus.MustNewConstMetric(pc.nodes_allocated, prometheus.GaugeValue, pm[p].nodes_allocated, p)
+		ch <- prometheus.MustNewConstMetric(pc.nodes_idle, prometheus.GaugeValue, pm[p].nodes_idle, p)
+		ch <- prometheus.MustNewConstMetric(pc.nodes_other, prometheus.GaugeValue, pm[p].nodes_other, p)
+		ch <- prometheus.MustNewConstMetric(pc.nodes_total, prometheus.GaugeValue, pm[p].nodes_total, p)
         }
 }
