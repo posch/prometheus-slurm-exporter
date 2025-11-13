@@ -44,11 +44,11 @@ type SchedulerMetrics struct {
 	total_backfilled_jobs_since_start float64
 	total_backfilled_jobs_since_cycle float64
 	total_backfilled_heterogeneous    float64
-	jobs_submitted float64
-	jobs_started float64
-	jobs_completed float64
-	jobs_canceled float64
-	jobs_failed float64
+	jobs_submitted                    float64
+	jobs_started                      float64
+	jobs_completed                    float64
+	jobs_canceled                     float64
+	jobs_failed                       float64
 }
 
 // Execute the sdiag command and return its output
@@ -81,7 +81,7 @@ func ParseSchedulerMetrics(input []byte) *SchedulerMetrics {
 		if f {
 			floatval, _ := strconv.ParseFloat(strings.TrimSpace(val), 64)
 			switch strings.TrimSpace(key) {
-			case "Server thread count": 
+			case "Server thread count":
 				sm.threads = floatval
 			case "Agent queue size":
 				sm.queue_size = floatval
@@ -154,11 +154,11 @@ type SchedulerCollector struct {
 	total_backfilled_jobs_since_start *prometheus.Desc
 	total_backfilled_jobs_since_cycle *prometheus.Desc
 	total_backfilled_heterogeneous    *prometheus.Desc
-	jobs_submitted *prometheus.Desc
-	jobs_started *prometheus.Desc
-	jobs_completed *prometheus.Desc
-	jobs_canceled *prometheus.Desc
-	jobs_failed *prometheus.Desc
+	jobs_submitted                    *prometheus.Desc
+	jobs_started                      *prometheus.Desc
+	jobs_completed                    *prometheus.Desc
+	jobs_canceled                     *prometheus.Desc
+	jobs_failed                       *prometheus.Desc
 }
 
 // Send all metric descriptions
@@ -175,11 +175,11 @@ func (c *SchedulerCollector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- c.total_backfilled_jobs_since_start
 	ch <- c.total_backfilled_jobs_since_cycle
 	ch <- c.total_backfilled_heterogeneous
-	ch <- c.jobs_submitted 
-	ch <- c.jobs_started 
+	ch <- c.jobs_submitted
+	ch <- c.jobs_started
 	ch <- c.jobs_completed
-	ch <- c.jobs_canceled 
-	ch <- c.jobs_failed 
+	ch <- c.jobs_canceled
+	ch <- c.jobs_failed
 }
 
 // Send the values of all metrics
@@ -197,11 +197,11 @@ func (sc *SchedulerCollector) Collect(ch chan<- prometheus.Metric) {
 	ch <- prometheus.MustNewConstMetric(sc.total_backfilled_jobs_since_start, prometheus.GaugeValue, sm.total_backfilled_jobs_since_start)
 	ch <- prometheus.MustNewConstMetric(sc.total_backfilled_jobs_since_cycle, prometheus.GaugeValue, sm.total_backfilled_jobs_since_cycle)
 	ch <- prometheus.MustNewConstMetric(sc.total_backfilled_heterogeneous, prometheus.GaugeValue, sm.total_backfilled_heterogeneous)
-	ch <- prometheus.MustNewConstMetric(sc.jobs_submitted , prometheus.CounterValue, sm.jobs_submitted)
-	ch <- prometheus.MustNewConstMetric(sc.jobs_started , prometheus.CounterValue, sm.jobs_started)
+	ch <- prometheus.MustNewConstMetric(sc.jobs_submitted, prometheus.CounterValue, sm.jobs_submitted)
+	ch <- prometheus.MustNewConstMetric(sc.jobs_started, prometheus.CounterValue, sm.jobs_started)
 	ch <- prometheus.MustNewConstMetric(sc.jobs_completed, prometheus.CounterValue, sm.jobs_completed)
-	ch <- prometheus.MustNewConstMetric(sc.jobs_canceled , prometheus.CounterValue, sm.jobs_canceled)
-	ch <- prometheus.MustNewConstMetric(sc.jobs_failed , prometheus.CounterValue, sm.jobs_failed)
+	ch <- prometheus.MustNewConstMetric(sc.jobs_canceled, prometheus.CounterValue, sm.jobs_canceled)
+	ch <- prometheus.MustNewConstMetric(sc.jobs_failed, prometheus.CounterValue, sm.jobs_failed)
 }
 
 // Returns the Slurm scheduler collector, used to register with the prometheus client
@@ -271,22 +271,22 @@ func NewSchedulerCollector() *SchedulerCollector {
 			"slurm_scheduler_jobs_submitted",
 			"sdiag: Number of jobs submitted since last reset",
 			nil,
-			nil), 
+			nil),
 		jobs_started: prometheus.NewDesc(
 			"slurm_scheduler_jobs_started",
 			"sdiag: Number of jobs started sind last reset. This includes backfillled jobs.",
 			nil,
-			nil),  
+			nil),
 		jobs_completed: prometheus.NewDesc(
 			"slurm_scheduler_jobs_completed",
 			"sdiag: Number of jobs completed since last reset",
 			nil,
-			nil), 
+			nil),
 		jobs_canceled: prometheus.NewDesc(
 			"slurm_scheduler_jobs_canceled",
 			"sdiag: Number of jobs canceled since last reset",
 			nil,
-			nil),  
+			nil),
 		jobs_failed: prometheus.NewDesc(
 			"slurm_scheduler_jobs_failed",
 			"sdiag: Numer of jobs failed since last reset",
